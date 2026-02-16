@@ -53,8 +53,56 @@ body {
 }
 
 
-/* Card Style (future use) */
+
 .card {
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.register-section {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    padding-top: 120px;
+    color: white;
+}
+
+.register-section h2 {
+    font-weight: 600;
+}
+
+.register-section .form-control,
+.register-section .form-select {
+    background-color: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+}
+
+.register-section .form-control::placeholder {
+    color: #cbd5e1;
+}
+
+.register-section .form-label {
+    color: #e2e8f0;
+}
+.register-section .form-select {
+    background-color: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    appearance: none;
+    padding-right: 40px;
+}
+
+.register-section .form-select:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 10px rgba(20,184,166,0.4);
+}
+
+.register-section option {
+    color: black;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 8px rgba(20,184,166,0.4);
 }
