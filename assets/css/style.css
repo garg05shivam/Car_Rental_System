@@ -1,0 +1,60 @@
+
+body {
+    background-color: #f4f7fb;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.navbar {
+    background: rgba(15,23,42,0.6);
+    backdrop-filter: blur(10px);
+}
+
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+
+.hero-section {
+    height: 100vh;
+    background: linear-gradient(rgba(15,23,42,0.7), rgba(15,23,42,0.7)),
+                url('../images/hero.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+}
+
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: #e2e8f0;
+}
+
+
+.btn-primary {
+    background-color: #14b8a6;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0d9488;
+    transform: translateY(-3px);
+}
+
+
+/* Card Style (future use) */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
