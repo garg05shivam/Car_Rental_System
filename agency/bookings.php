@@ -34,7 +34,6 @@ $result = $stmt->get_result();
 
     <h2 class="mb-4 text-center">Car Bookings</h2>
 
-    <!-- ✅ Success Message -->
     <?php if (isset($_GET['msg']) && $_GET['msg'] == 'updated'): ?>
         <div class="alert alert-success">
             Booking status updated successfully!

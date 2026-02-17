@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once "../config/db.php";
 
-// Access control
+
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== "agency") {
     header("Location: ../auth/login.php");
     exit();
@@ -22,7 +22,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $rent_per_day = floatval($_POST["rent_per_day"]);
     $description = trim($_POST["description"]);
 
-    // Image upload
     $image_name = null;
 
 if (isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] == 0) {
@@ -30,7 +29,6 @@ if (isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] == 0) {
   $target_dir = "../assets/uploads/cars/";
 
 
-    // Make sure this folder exists
     if (!is_dir($target_dir)) {
         mkdir($target_dir, 0777, true);
     }
@@ -41,7 +39,6 @@ if (isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] == 0) {
 
     move_uploaded_file($_FILES["car_image"]["tmp_name"], $target_file);
 }
-    // Insert query
     $query = "INSERT INTO cars 
               (agency_id, vehicle_model, vehicle_number, seating_capacity, rent_per_day, image, description) 
               VALUES (?, ?, ?, ?, ?, ?, ?)";

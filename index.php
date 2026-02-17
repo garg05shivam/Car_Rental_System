@@ -1,7 +1,6 @@
 <?php include "includes/header.php"; ?>
 <?php include "includes/navbar.php"; ?>
 
-<!-- HERO SECTION -->
 <section class="hero-section text-white d-flex align-items-center">
     <div class="container text-center">
         <h1 class="display-4 fw-bold">Drive Your Dream Car</h1>
@@ -23,7 +22,6 @@
     </div>
 </section>
 
-<!-- FEATURES SECTION -->
 <section class="py-5 bg-light">
     <div class="container text-center">
         <h2 class="mb-4">Why Choose Us?</h2>
@@ -59,7 +57,6 @@
     </div>
 </section>
 
-<!-- CALL TO ACTION -->
 <section class="py-5 text-center bg-dark text-white">
     <div class="container">
         <h3>Ready to hit the road?</h3>
