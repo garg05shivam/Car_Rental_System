@@ -1,49 +1,85 @@
-<?php 
-if (session_status() === PHP_SESSION_NONE) session_start(); 
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-  <div class="container">
-    <a class="navbar-brand" href="/car_rental/">CarRental</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+        <a class="navbar-brand" href="/car_rental/index.php">
+            CarRental
+        </a>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <li class="nav-item">
-          <a class="nav-link" href="/car_rental/available_cars.php">Available Cars</a>
-        </li>
+        <div class="collapse navbar-collapse" id="navbarNav">
 
-        <?php if (!isset($_SESSION["user_id"])): ?>
+            <ul class="navbar-nav ms-auto">
 
-          
-          <li class="nav-item">
-            <a class="nav-link" href="/car_rental/auth/login.php">Login</a>
-          </li>
+               
+                <li class="nav-item">
+                    <a class="nav-link <?php echo ($currentPage == 'available_cars.php') ? 'active' : ''; ?>"
+                       href="/car_rental/available_cars.php">
+                        Available Cars
+                    </a>
+                </li>
 
-          <li class="nav-item">
-            <a class="nav-link ms-3" href="/car_rental/auth/register.php">Register</a>
-          </li>
+                <?php if (isset($_SESSION["user_id"])): ?>
 
-        <?php else: ?>
+                    
+                    <?php if ($_SESSION["role"] == "agency"): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo ($currentPage == 'dashboard.php') ? 'active' : ''; ?>"
+                               href="/car_rental/agency/dashboard.php">
+                                Agency Dashboard
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
-          
-          <li class="nav-item">
-            <span class="nav-link text-info">
-              <?php echo $_SESSION["user_name"]; ?>
-            </span>
-          </li>
+                    
+                    <?php if ($_SESSION["role"] == "customer"): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo ($currentPage == 'dashboard.php') ? 'active' : ''; ?>"
+                               href="/car_rental/customer/dashboard.php">
+                                My Bookings
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
-          <li class="nav-item">
-            <a class="nav-link" href="/car_rental/auth/logout.php">Logout</a>
-          </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link text-danger"
+                           href="/car_rental/auth/logout.php">
+                            Logout
+                        </a>
+                    </li>
 
-        <?php endif; ?>
+                <?php else: ?>
 
-      </ul>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo ($currentPage == 'login.php') ? 'active' : ''; ?>"
+                           href="/car_rental/auth/login.php">
+                            Login
+                        </a>
+                    </li>
+
+                    
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo ($currentPage == 'register.php') ? 'active' : ''; ?>"
+                           href="/car_rental/auth/register.php">
+                            Register
+                        </a>
+                    </li>
+
+                <?php endif; ?>
+
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
