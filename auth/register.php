@@ -10,12 +10,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = trim($_POST["password"]);
     $role = $_POST["role"];
 
-    // Only allow customer or agency
+   
     if ($role !== "customer" && $role !== "agency") {
         die("Invalid role selected.");
     }
 
-    // Check if email already exists
     $checkQuery = "SELECT id FROM users WHERE email = ?";
     $stmt = $conn->prepare($checkQuery);
     $stmt->bind_param("s", $email);
@@ -26,19 +25,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = "Email already registered!";
     } else {
 
-        // Hash password
+        
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // Insert user
+        
         $insertQuery = "INSERT INTO users (full_name, email, password, role) VALUES (?, ?, ?, ?)";
         $stmt = $conn->prepare($insertQuery);
         $stmt->bind_param("ssss", $full_name, $email, $hashed_password, $role);
 
         if ($stmt->execute()) {
-            $message = "Registration successful! You can now login.";
-        } else {
-            $message = "Something went wrong. Try again.";
-        }
+
+    
+    header("Location: login.php?msg=registered");
+    exit();
+
+} else {
+    $message = "Something went wrong. Try again.";
+}
+
     }
 }
 ?>
