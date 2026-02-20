@@ -7,6 +7,10 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "agency") {
     exit();
 }
 
+if (empty($_SESSION["csrf_token"])) {
+    $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+}
+
 $agency_id = $_SESSION["user_id"];
 
 $query = "
@@ -95,15 +99,23 @@ $result = $stmt->get_result();
 
                         <td>
                             <?php if ($status == "pending"): ?>
-                                <a href="update_booking.php?id=<?php echo $row["id"]; ?>&action=approve" 
-                                   class="btn btn-success btn-sm me-1">
-                                   Approve
-                                </a>
+                                <form method="POST" action="update_booking.php" class="d-inline">
+                                    <input type="hidden" name="id" value="<?php echo (int)$row["id"]; ?>">
+                                    <input type="hidden" name="action" value="approve">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION["csrf_token"]); ?>">
+                                    <button type="submit" class="btn btn-success btn-sm me-1">
+                                        Approve
+                                    </button>
+                                </form>
 
-                                <a href="update_booking.php?id=<?php echo $row["id"]; ?>&action=reject" 
-                                   class="btn btn-danger btn-sm">
-                                   Reject
-                                </a>
+                                <form method="POST" action="update_booking.php" class="d-inline">
+                                    <input type="hidden" name="id" value="<?php echo (int)$row["id"]; ?>">
+                                    <input type="hidden" name="action" value="reject">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION["csrf_token"]); ?>">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        Reject
+                                    </button>
+                                </form>
                             <?php else: ?>
                                 -
                             <?php endif; ?>

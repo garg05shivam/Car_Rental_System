@@ -95,7 +95,7 @@ if (isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] == 0) {
 
     <?php if ($message != ""): ?>
         <div class="alert alert-info">
-            <?php echo $message; ?>
+            <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
 

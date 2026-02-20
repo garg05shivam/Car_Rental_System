@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <?php if ($message != ""): ?>
             <div class="alert alert-info text-center">
-                <?php echo $message; ?>
+                <?php echo htmlspecialchars($message); ?>
             </div>
         <?php endif; ?>
 

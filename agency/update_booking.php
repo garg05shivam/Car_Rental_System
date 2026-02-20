@@ -8,13 +8,21 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "agency") {
     exit();
 }
 
-if (!isset($_GET["id"]) || !isset($_GET["action"])) {
+if ($_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST["id"]) || !isset($_POST["action"])) {
     header("Location: bookings.php");
     exit();
 }
 
-$booking_id = intval($_GET["id"]);
-$action = $_GET["action"];
+if (
+    !isset($_POST["csrf_token"], $_SESSION["csrf_token"]) ||
+    !hash_equals($_SESSION["csrf_token"], $_POST["csrf_token"])
+) {
+    header("Location: bookings.php");
+    exit();
+}
+
+$booking_id = intval($_POST["id"]);
+$action = $_POST["action"];
 
 
 if ($action == "approve") {
@@ -64,27 +72,46 @@ $status_updated = false;
 try {
 
     
-    $updateBooking = "UPDATE bookings SET status = ? WHERE id = ?";
+    $updateBooking = "UPDATE bookings SET status = ? WHERE id = ? AND status = 'pending'";
     $stmt = $conn->prepare($updateBooking);
     $stmt->bind_param("si", $new_status, $booking_id);
     $stmt->execute();
+    if ($stmt->affected_rows !== 1) {
+        throw new Exception("Booking is not pending");
+    }
     $status_updated = true;
 
     if ($new_status == "confirmed") {
+        $existingConfirmed = "SELECT id FROM bookings WHERE car_id = ? AND status = 'confirmed' AND id <> ? LIMIT 1";
+        $stmt2 = $conn->prepare($existingConfirmed);
+        $stmt2->bind_param("ii", $car_id, $booking_id);
+        $stmt2->execute();
+        $confirmedResult = $stmt2->get_result();
+
+        if ($confirmedResult->num_rows > 0) {
+            throw new Exception("Car already has a confirmed booking");
+        }
 
         $updateCar = "UPDATE cars SET status = 'booked' WHERE id = ?";
-        $stmt2 = $conn->prepare($updateCar);
-        $stmt2->bind_param("i", $car_id);
-        $stmt2->execute();
+        $stmt3 = $conn->prepare($updateCar);
+        $stmt3->bind_param("i", $car_id);
+        $stmt3->execute();
     }
 
    
     if ($new_status == "cancelled") {
+        $activeBookingCheck = "SELECT id FROM bookings WHERE car_id = ? AND status = 'confirmed' LIMIT 1";
+        $stmt4 = $conn->prepare($activeBookingCheck);
+        $stmt4->bind_param("i", $car_id);
+        $stmt4->execute();
+        $activeResult = $stmt4->get_result();
 
-        $updateCar = "UPDATE cars SET status = 'available' WHERE id = ?";
-        $stmt3 = $conn->prepare($updateCar);
-        $stmt3->bind_param("i", $car_id);
-        $stmt3->execute();
+        if ($activeResult->num_rows === 0) {
+            $updateCar = "UPDATE cars SET status = 'available' WHERE id = ?";
+            $stmt5 = $conn->prepare($updateCar);
+            $stmt5->bind_param("i", $car_id);
+            $stmt5->execute();
+        }
     }
 
     $conn->commit();

@@ -8,41 +8,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $email = trim($_POST["email"]);
     $password = trim($_POST["password"]);
+    $message = "Invalid email or password.";
 
-    $query = "SELECT id, full_name, password, role FROM users WHERE email = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    if ($email === "" || $password === "") {
+        $message = "Invalid email or password.";
+    } else {
 
-    if ($result->num_rows == 1) {
+        $query = "SELECT id, full_name, password, role FROM users WHERE email = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-        $user = $result->fetch_assoc();
+        if ($result->num_rows == 1) {
 
-        if (password_verify($password, $user["password"])) {
+            $user = $result->fetch_assoc();
 
-            session_regenerate_id(true);
-            $_SESSION["user_id"] = $user["id"];
-            $_SESSION["full_name"] = $user["full_name"];
-            $_SESSION["user_name"] = $user["full_name"];
-            $_SESSION["role"] = $user["role"];
+            if (password_verify($password, $user["password"])) {
+
+                session_regenerate_id(true);
+                $_SESSION["user_id"] = $user["id"];
+                $_SESSION["full_name"] = $user["full_name"];
+                $_SESSION["user_name"] = $user["full_name"];
+                $_SESSION["role"] = $user["role"];
 
            
-            if ($user["role"] == "customer") {
-                header("Location: ../customer/dashboard.php");
-            } elseif ($user["role"] == "agency") {
-                header("Location: ../agency/dashboard.php");
-            } elseif ($user["role"] == "admin") {
-                header("Location: ../admin/dashboard.php");
+                if ($user["role"] == "customer") {
+                    header("Location: ../customer/dashboard.php");
+                } elseif ($user["role"] == "agency") {
+                    header("Location: ../agency/dashboard.php");
+                } else {
+                    header("Location: ../index.php");
+                }
+                exit();
             }
-            exit();
-
-        } else {
-            $message = "Incorrect password!";
         }
-
-    } else {
-        $message = "User not found!";
     }
 }
 ?>
@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <?php if ($message != ""): ?>
             <div class="alert alert-danger text-center">
-                <?php echo $message; ?>
+                <?php echo htmlspecialchars($message); ?>
             </div>
         <?php endif; ?>
 

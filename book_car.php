@@ -13,6 +13,14 @@ if ($_SERVER["REQUEST_METHOD"] != "POST" || !isset($_POST["car_id"])) {
     exit();
 }
 
+if (
+    !isset($_POST["csrf_token"], $_SESSION["csrf_token"]) ||
+    !hash_equals($_SESSION["csrf_token"], $_POST["csrf_token"])
+) {
+    header("Location: available_cars.php");
+    exit();
+}
+
 $car_id = intval($_POST["car_id"]);
 $customer_id = $_SESSION["user_id"];
 $start_date = $_POST["start_date"];

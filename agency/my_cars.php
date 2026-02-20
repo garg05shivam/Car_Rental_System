@@ -8,6 +8,10 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== "agency") {
     exit();
 }
 
+if (empty($_SESSION["csrf_token"])) {
+    $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+}
+
 $agency_id = $_SESSION["user_id"];
 
 // Fetch only this agency cars
@@ -95,11 +99,13 @@ $result = $stmt->get_result();
                                Edit
                             </a>
 
-                            <a href="delete_car.php?id=<?php echo $row['id']; ?>" 
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Are you sure you want to delete this car?');">
-                               Delete
-                            </a>
+                            <form method="POST" action="delete_car.php" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this car?');">
+                                <input type="hidden" name="id" value="<?php echo (int)$row['id']; ?>">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION["csrf_token"]); ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Delete
+                                </button>
+                            </form>
                         </td>
                     </tr>
 

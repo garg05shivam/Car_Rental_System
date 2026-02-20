@@ -1,6 +1,10 @@
 <?php
 session_start();
 require_once "config/db.php";
+
+if (empty($_SESSION["csrf_token"])) {
+    $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+}
 ?>
 
 <?php include "includes/header.php"; ?>
@@ -58,6 +62,7 @@ require_once "config/db.php";
                         <form method="POST" action="book_car.php" class="mt-auto">
 
                             <input type="hidden" name="car_id" value="<?php echo $row['id']; ?>">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION["csrf_token"]); ?>">
 
                             <div class="mb-2">
                                 <label class="form-label">Start Date</label>
