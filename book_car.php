@@ -32,37 +32,35 @@ if ($start_date < date("Y-m-d")) {
 
 $end_date = date("Y-m-d", strtotime($start_date . " +$number_of_days days"));
 
-$query = "SELECT rent_per_day FROM cars WHERE id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $car_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$car = $result->fetch_assoc();
-
-if (!$car) {
-    header("Location: available_cars.php");
-    exit();
-}
-
-$checkBooking = "SELECT id FROM bookings 
-                 WHERE car_id = ? 
-                 AND status IN ('pending','confirmed')";
-
-$stmt = $conn->prepare($checkBooking);
-$stmt->bind_param("i", $car_id);
-$stmt->execute();
-$stmt->store_result();
-
-if ($stmt->num_rows > 0) {
-    header("Location: available_cars.php");
-    exit();
-}
-
-$total_amount = $car["rent_per_day"] * $number_of_days;
-
 $conn->begin_transaction();
+$booking_created = false;
 
 try {
+    $query = "SELECT rent_per_day, status FROM cars WHERE id = ? FOR UPDATE";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $car_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $car = $result->fetch_assoc();
+
+    if (!$car || $car["status"] !== "available") {
+        throw new Exception("Car not available");
+    }
+
+    $checkBooking = "SELECT id FROM bookings 
+                     WHERE car_id = ? 
+                     AND status IN ('pending','confirmed')";
+    $stmt = $conn->prepare($checkBooking);
+    $stmt->bind_param("i", $car_id);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        throw new Exception("Car already has active booking");
+    }
+
+    $total_amount = $car["rent_per_day"] * $number_of_days;
+
 
     $insert = "INSERT INTO bookings 
                (car_id, customer_id, start_date, end_date, number_of_days, total_amount, status)
@@ -80,12 +78,27 @@ try {
     );
     $stmt->execute();
 
+    $updateCar = "UPDATE cars SET status = 'booked' WHERE id = ? AND status = 'available'";
+    $stmt = $conn->prepare($updateCar);
+    $stmt->bind_param("i", $car_id);
+    $stmt->execute();
+
+    if ($stmt->affected_rows !== 1) {
+        throw new Exception("Failed to reserve car");
+    }
+
+    $booking_created = true;
+
     $conn->commit();
 
 } catch (Exception $e) {
     $conn->rollback();
 }
 
-header("Location: customer/dashboard.php?msg=booked");
+if ($booking_created) {
+    header("Location: customer/dashboard.php?msg=booked");
+} else {
+    header("Location: available_cars.php");
+}
 exit();
 ?>

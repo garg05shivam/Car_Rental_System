@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once "../config/db.php";
 
 $message = "";
@@ -10,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = trim($_POST["password"]);
     $role = $_POST["role"];
 
-    // ================= VALIDATIONS =================
+   
 
     if (empty($full_name) || empty($email) || empty($password) || empty($role)) {
         $message = "All fields are required.";
@@ -34,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     else {
 
-        // Check if email already exists
+ 
         $checkQuery = "SELECT id FROM users WHERE email = ?";
         $stmt = $conn->prepare($checkQuery);
         $stmt->bind_param("s", $email);
@@ -45,7 +46,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $message = "Email already registered!";
         } else {
 
-            // Hash password securely
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
             $insertQuery = "INSERT INTO users (full_name, email, password, role) VALUES (?, ?, ?, ?)";

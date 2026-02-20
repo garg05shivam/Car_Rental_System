@@ -23,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $description = trim($_POST["description"]);
 
     $image_name = null;
+    $upload_ok = true;
 
 if (isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] == 0) {
 
@@ -33,32 +34,55 @@ if (isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] == 0) {
         mkdir($target_dir, 0777, true);
     }
 
-    $image_name = time() . "_" . basename($_FILES["car_image"]["name"]);
+    $maxSize = 2 * 1024 * 1024; // 2MB
+    $allowedExtensions = ["jpg", "jpeg", "png", "webp"];
+    $allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 
-    $target_file = $target_dir . $image_name;
+    $originalName = basename($_FILES["car_image"]["name"]);
+    $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+    $mime = mime_content_type($_FILES["car_image"]["tmp_name"]);
 
-    move_uploaded_file($_FILES["car_image"]["tmp_name"], $target_file);
+    if (!in_array($ext, $allowedExtensions, true) || !in_array($mime, $allowedMimeTypes, true)) {
+        $message = "Only JPG, JPEG, PNG, WEBP images are allowed.";
+        $upload_ok = false;
+    } elseif ($_FILES["car_image"]["size"] > $maxSize) {
+        $message = "Image size must be 2MB or less.";
+        $upload_ok = false;
+    }
+
+    if ($upload_ok) {
+        $image_name = time() . "_" . preg_replace("/[^a-zA-Z0-9._-]/", "_", $originalName);
+
+        $target_file = $target_dir . $image_name;
+
+        if (!move_uploaded_file($_FILES["car_image"]["tmp_name"], $target_file)) {
+            $message = "Image upload failed.";
+            $upload_ok = false;
+        }
+    }
 }
-    $query = "INSERT INTO cars 
-              (agency_id, vehicle_model, vehicle_number, seating_capacity, rent_per_day, image, description) 
-              VALUES (?, ?, ?, ?, ?, ?, ?)";
+    if ($upload_ok && $image_name !== null) {
+        $query = "INSERT INTO cars 
+                  (agency_id, vehicle_model, vehicle_number, seating_capacity, rent_per_day, image, description) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param(
-        "issidss",
-        $agency_id,
-        $vehicle_model,
-        $vehicle_number,
-        $seating_capacity,
-        $rent_per_day,
-        $image_name,
-        $description
-    );
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param(
+            "issidss",
+            $agency_id,
+            $vehicle_model,
+            $vehicle_number,
+            $seating_capacity,
+            $rent_per_day,
+            $image_name,
+            $description
+        );
 
-    if ($stmt->execute()) {
-        $message = "Car added successfully!";
-    } else {
-        $message = "Something went wrong!";
+        if ($stmt->execute()) {
+            $message = "Car added successfully!";
+        } else {
+            $message = "Something went wrong!";
+        }
     }
 }
 ?>
@@ -104,7 +128,7 @@ if (isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] == 0) {
 
         <div class="mb-3">
     <label class="form-label">Car Image</label>
-    <input type="file" name="car_image" class="form-control" required>
+    <input type="file" name="car_image" class="form-control" accept=".jpg,.jpeg,.png,.webp" required>
 </div>
 
 

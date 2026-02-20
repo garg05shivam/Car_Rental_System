@@ -59,6 +59,7 @@ if ($agency_id != $_SESSION["user_id"]) {
 
 
 $conn->begin_transaction();
+$status_updated = false;
 
 try {
 
@@ -67,6 +68,7 @@ try {
     $stmt = $conn->prepare($updateBooking);
     $stmt->bind_param("si", $new_status, $booking_id);
     $stmt->execute();
+    $status_updated = true;
 
     if ($new_status == "confirmed") {
 
@@ -92,6 +94,10 @@ try {
     $conn->rollback();
 }
 
-header("Location: bookings.php?msg=updated");
+if ($status_updated) {
+    header("Location: bookings.php?msg=updated");
+} else {
+    header("Location: bookings.php");
+}
 exit();
 ?>
